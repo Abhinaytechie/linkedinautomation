@@ -1,0 +1,353 @@
+{
+  "name": "linkedinautomation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -912,
+        1312
+      ],
+      "id": "19bf7739-3ef1-495a-abfa-9d2bf19b7cb4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "AINewsKeywords",
+              "value": "AI advancements, LLM research, machine learning breakthroughs, artificial intelligence news",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "rssFeeds",
+              "value": "https://news.google.com/rss/search?q=artificial+intelligence+OR+machine+learning+OR+LLM+OR+large+language+models+OR+AI+research+when:7d&hl=en-US&gl=US&ceid=US:en",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "maxArticles",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "linkedInPersonURN",
+              "value": "urn:li:person:W-4upPaK9W",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6bff78e8-f974-4538-b18f-a1e944584750",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -688,
+        1312
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this AI/LLM news article in detail:\n\nTitle: {{ $json.title }}\nContent: {{ $json.contentSnippet }}\n\nProvide:\n1. A hooking title for the LinkedIn post with emojis\n2. A comprehensive 2-3 paragraph summary covering key points, implications, and context and also include emojisss\n3. Identify the main stakeholders and impact\n4. Extract 5-7 relevant hashtags",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert AI and LLMs research analyst. Create detailed, insightful summaries that provide context, analysis, and industry implications. Focus on what makes this news significant and actionable for professionals in the AI/ML and LLM research sector."
+        }
+      },
+      "id": "b94e9952-22d9-4096-b4fa-37927a27ef9d",
+      "name": "Article Summarization Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -16,
+        1312
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "id": "971706a2-fb86-4435-be3d-ab95c9203d5c",
+      "name": "Groq Chat Model - Summarization",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -8,
+        1536
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "5v7s9pp2KdxTmCf3",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"title\": \"Engaging LinkedIn post title with hook\",\n\t\"summary\": \"Detailed 2-3 paragraph analysis with context and implications\",\n\t\"key_points\": [\"Point 1\", \"Point 2\", \"Point 3\"],\n\t\"stakeholders\": \"Who is affected and how\",\n\t\"hashtags\": [\"#AI\", \"#LLM\", \"#MachineLearning\", \"#AIResearch\", \"#DeepLearning\", \"#NLP\", \"#GenerativeAI\"]\n}"
+      },
+      "id": "c6bb33f8-9824-476e-a742-4510f8e2ebab",
+      "name": "Structured Output Parser - Summary",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        120,
+        1536
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a professional LinkedIn post:\n\nPost Title: {{ $json.output.title }}\nOriginal Article Title: {{ $json.title }}\nDetailed Summary: {{ $json.output.summary }}\nKey Points: {{ $json.output.key_points.join(\", \") }}\nStakeholders: {{ $json.output.stakeholders }}\nHashtags: {{ $json.output.hashtags.join(\" \") }}\n\nFormat:\n- Use the provided post title as the attention-grabbing hook with emoji\n- 2-3 paragraphs with insights and analysis\n- Bullet points for key takeaways\n- Call-to-action question to engage audience\n- Hashtags\n- Link with context",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a LinkedIn content strategist for the AI and LLM research industry. Create engaging, professional posts that spark discussion, provide value, and position the author as a thought leader. Use storytelling, data points, and questions to drive engagement."
+        }
+      },
+      "id": "43ed2ffe-1cad-49e0-beb1-9e8c8e3719fa",
+      "name": "Social Content Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        336,
+        1312
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "id": "c4e9eec7-4b66-44b6-bc21-dcdb11254412",
+      "name": "Groq Chat Model - Content Generator",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        344,
+        1536
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "5v7s9pp2KdxTmCf3",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"hook\": \"🤖 Attention-grabbing opening with emoji and intrigue\",\n\t\"main_content\": \"2-3 paragraphs with detailed insights, analysis, and context. Include specific details and implications.\",\n\t\"key_takeaways\": [\"• Takeaway 1\", \"• Takeaway 2\", \"• Takeaway 3\"],\n\t\"engagement_question\": \"Thought-provoking question to spark discussion\",\n\t\"hashtags\": \"#AI #LLM #MachineLearning #AIResearch #DeepLearning #GenerativeAI\",\n\t\"link_context\": \"Brief context about why to read the full article\"\n}"
+      },
+      "id": "64e31de8-29d3-46dc-9f9f-42c18fec3e5f",
+      "name": "Structured Output Parser - Social",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        472,
+        1536
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Workflow Configuration').first().json.rssFeeds }}",
+        "options": {}
+      },
+      "id": "275faabc-b33d-47ca-a37c-902c0abedcfc",
+      "name": "Read RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -464,
+        1312
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "addfb022-2d0e-4a57-bf4f-625dddb0472e",
+      "name": "Limit to 3 Articles",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        1312
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/ugcPosts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer AQVkp3qfk6413dgvPE06DyBdJ6OshLTWEJIf0STWTExjl_ufMHnOvqn5qaji49AGLqHQLMX21SBXoB_qlWz9DvF7UUK1XKTwtf3s1yHZa2_2LU29b2HnL4k5vz1-5mas1liXMr32Xj8oKzIVuw94_07Kus5phmaxqzt4lr9ddPP1flFxY76SHHb0w0NBjy_3-lN2m8j1Bx1pCQjg-Mtgkabz5Kl6G7X7BKCqfmvHeBCU0zFPoC55JcZHDmwNAMPin92hQHB--5rouP500q3uxY2YowOCTNXkSytxh9m1hodkNRegMPf1coIEsIcXgvm3lK9zI-5lY9TLVA0UwEJUY_q13XDx9g"
+            },
+            {
+              "name": "X-Restli-Protocol-Version",
+              "value": "2.0.0"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"author\": \"urn:li:person:W-4upPaK9W\",\n  \"lifecycleState\": \"PUBLISHED\",\n  \"specificContent\": {\n    \"com.linkedin.ugc.ShareContent\": {\n      \"shareCommentary\": {\n        \"text\": $json.output.hook + \"\\n\\n\" + $json.output.main_content + \"\\n\\n\" + $json.output.key_takeaways.slice(0, 3).join(\"\\n\") + \"\\n\\n\" + $json.output.engagement_question + \"\\n\\n\" + $json.output.hashtags + \"\\n\\n\" + $json.output.link_context \n      },\n      \"shareMediaCategory\": \"NONE\"\n    }\n  },\n  \"visibility\": {\n    \"com.linkedin.ugc.MemberNetworkVisibility\": \"PUBLIC\"\n  }\n} }}",
+        "options": {}
+      },
+      "id": "52120371-ee5a-47bc-aa4c-d71f13623964",
+      "name": "Post to LinkedIn via UGC API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        688,
+        1312
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model - Summarization": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Article Summarization Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser - Summary": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Article Summarization Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article Summarization Agent": {
+      "main": [
+        [
+          {
+            "node": "Social Content Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model - Content Generator": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Social Content Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser - Social": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Social Content Generator Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Read RSS Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read RSS Feed": {
+      "main": [
+        [
+          {
+            "node": "Limit to 3 Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit to 3 Articles": {
+      "main": [
+        [
+          {
+            "node": "Article Summarization Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Content Generator Agent": {
+      "main": [
+        [
+          {
+            "node": "Post to LinkedIn via UGC API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "736b8186-8496-49f4-a7ab-cf927dff8d01",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a7f5c72e629949d8654e8330875bbfb686a59c48893268a0f6c2ecddeef402b5"
+  },
+  "id": "oWoOGq9p0izsAQGP",
+  "tags": []
+}
